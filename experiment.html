@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My experiment</title>
+        <script src="jspsych-6/jspsych.js"></script>
+        <script src="jspsych-6/plugins/jspsych-html-keyboard-response.js"></script>
+        <link href="jspsych-6/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+
+    </head>
+    <body></body>
+    <script>
+
+    var timeline = [];
+	var welcome_page = {
+		type: "html-keyboard-response",
+		stimulus: "Welcome to the Seara's experiment. Press any key to begin, and be ready to be amazed.  "
+	};
+	timeline.push(welcome_page);
+
+	var instructions = {
+  	type: "html-keyboard-response",
+  	stimulus: "<p>In this experiment, a question will appear in the center of the screen with two choices .</p><p> press letter F and J according to your choice. </p>" +
+      "<p>Press any key to begin.</p>"
+	};
+	timeline.push(instructions);
+
+	var fixation = {
+		  type: 'html-keyboard-response',
+		  stimulus: "<img src='img/meme.jpg'></img>",
+		  choices: jsPsych.NO_KEYS,
+		  trial_duration: function(){
+        return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+      },
+      data: {test_part: 'fixation'}
+	}
+
+ 	// actual test
+ 	// TODO figure out stimulus 
+	var test_stimuli = [
+       { 
+      	stimulus: "<p style=\"font-size: 25px;  font-weight:bold\">w</p>",
+      	data: {
+	      		test_part: 'test', 
+	      		correct_response: "j"
+      		}
+        },
+        { 
+      	symbol:"",
+      	stimulus: "<p style=\"font-size: 25px;  font-weight:bold\">a</p>",
+      	data: {
+	      		test_part: 'test', 
+	      		correct_response: "f"
+      		}
+        },
+        { 
+      	symbol:"",
+      	stimulus: "<p style=\"font-size: 25px;  font-weight:bold\">e</p>",
+      	data: {
+	      		test_part: 'test', 
+	      		correct_response: "f"
+      		}
+        }
+    ];
+
+    var test = {
+      type: 'html-keyboard-response',
+      stimulus: jsPsych.timelineVariable('stimulus'),
+      prompt: "<p>Is this a consonant or vowel? Press 'f' for vowel and 'j' for consonant.</p>",
+      choices: ['f', 'j'],
+      data: jsPsych.timelineVariable('data'),
+      on_finish: function(data){
+      	data.correct = data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.correct_response);
+	  },
+    }
+
+    var most_important_question = 
+    {
+    	type: "html-keyboard-response",
+      	stimulus: "<p style=\"font-size: 25px;  font-weight:bold\">Is pineapple on pizza a good idea?</p>",
+      prompt: "<p> Press 'f' for \"yes\" and 'j' for \"no\".</p>",
+      choices: ['f', 'j'],
+      data: {
+      		test_part: 'priority',
+		    correct_response: 'f'
+		},
+      on_finish: function(data){
+      	data.correct = data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.correct_response);	  }
+    }
+
+    var test_procedure = {
+      timeline: [fixation, test],
+      timeline_variables: test_stimuli,
+      repetitions: 1
+    }
+    timeline.push(test_procedure);
+
+    timeline.push(most_important_question);
+
+    var debrief_block = {
+	  type: "html-keyboard-response",
+	  stimulus: function() {
+
+	    var trials = jsPsych.data.get().filter({test_part: 'test'});
+	    var correct_trials = trials.filter({correct: true});
+	    var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+
+	    var most_important_question = jsPsych.data.get().filter({test_part: 'priority'}).filter({correct:true});
+	    var belonging = accuracy > 50 && most_important_question;
+	    var result = "<p>You responded correctly on "+accuracy+"% of the trials.</p>"
+		
+		if (belonging)
+		{
+			result+="<p>You belong to our lab, and you have great cullinary taste!</p>"
+		} 
+		else
+		{
+			result+="<p>Due to your low score or lack of taste buds, please get out of our lab</p>"
+		}
+	    return result+= "<p>Press any key to exit the experiment. Thank you!</p>";
+
+	  },
+	  on_finish: function () { window.close()}
+	};
+
+	timeline.push(debrief_block);
+
+
+	jsPsych.init({
+      timeline: timeline,
+      on_finish: function() {
+      window.close();
+  }
+    });
+
+
+    </script>
+</html>
