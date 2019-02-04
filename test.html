@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My experiment</title>
+        <script src="jspsych-6/jspsych.js"></script>
+        <script src="jspsych-6/plugins/jspsych-html-keyboard-response.js"></script>
+        <link href="jspsych-6/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+
+    </head>
+    <body></body>
+    <script>
+
+var trial = {
+  // plugin options go here for this trial
+}
+
+var if_chunk = {
+  chunk_type: 'if',
+  conditional_function: function() {
+    if(jsPsych.totalTime() >= 60*60*1000) {
+      return false;
+    } else {
+      return true;
+    }
+  },
+  timeline: [trial]
+}
+
+jsPsych.init({
+  experiment_structure: [if_chunk]
+});

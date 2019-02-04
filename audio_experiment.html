@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My experiment</title>
+        <script src="jspsych-6/jspsych.js"></script>
+        <script src="jspsych-6/plugins/jspsych-html-keyboard-response.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="jspsych-6/plugins/jspsych-audio-keyboard-response.js"></script>
+        <script src="jspsych-6/plugins/jspsych-audio-button-response.js"></script>
+        <script src="jspsych-6/plugins/jspsych-audio-slider-response.js"></script>
+        <link href="jspsych-6/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+
+    </head>
+    <body></body>
+    <script>
+
+  var timeline = [];
+	var welcome_page = {
+		type: "html-keyboard-response",
+		stimulus: "Welcome to the Seara's experiment. Press any key to begin, and be ready to be amazed.  "
+	};
+	timeline.push(welcome_page);
+
+	var instructions = {
+  	type: "html-keyboard-response",
+  	stimulus: "<p>In this experiment, a question will appear in the center of the screen with two choices .</p><p> press letter F and J according to your choice. </p>" +
+      "<p>Press any key to begin.</p>"
+	};
+	timeline.push(instructions);
+
+	var fixation = {
+		  type: 'html-keyboard-response',
+		  stimulus: "<img src='img/meme.jpg'></img>",
+		  choices: jsPsych.NO_KEYS,
+		  trial_duration: function(){
+        return jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+      },
+      data: {test_part: 'fixation'}
+	}
+
+ 	// actual test
+ 	// TODO figure out stimulus 
+	var trial1 = 
+    { 
+        //type: 'multi-stim-multi-response',
+        type: "audio-button-response",
+      	stimulus:'./mp3s/SEVENTEEN_Dont_Wanna_Cry.mp3',
+        choices: ['1','2','3','4','5','replay'],
+        button_html: '<button class="jspsych-btn">%choice%</button>',
+        prompt: '<p>How acceptable is the music , rating from 1 to 5<\p> <p>press replay to hear it again</p>',
+        margin_vertical: '0px',
+        margin_horizontal : '8px',
+        on_finish: function(data)
+        {
+          data.correct = data.button_pressed
+        }
+  };
+  //timeline.push(trial1);
+
+
+var while_loop_chunk = {
+  chunk_type: 'while',
+  timeline: [trial1],
+  continue_function: function(data){
+    var response = JSON.parse(data[0].button_pressed); // convert JSON to array
+    if(response[0] == "5") { // if it is the 5th button
+      return true; // continue the loop
+    } else {
+      return false; // end the loop
+    }
+  }
+}
+timeline.push(while_loop_chunk)
+
+    var most_important_question = 
+    {
+    	type: "html-keyboard-response",
+      	stimulus: "<p style=\"font-size: 25px;  font-weight:bold\">Is pineapple on pizza a good idea?</p>",
+      prompt: "<p> Press 'f' for \"yes\" and 'j' for \"no\".</p>",
+      choices: ['f', 'j'],
+      data: {
+      		test_part: 'priority',
+		    correct_response: 'f'
+		},
+      on_finish: function(data){
+      	data.correct = data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode(data.correct_response);	  }
+    }
+
+
+    //timeline.push(most_important_question);
+
+
+    var debrief_block = {
+	  type: "html-keyboard-response",
+	  stimulus: function() {
+
+	    return "<p>Press any key to exit the experiment. Thank you!</p>";
+
+	  },
+	  on_finish: function () { window.close()}
+	};
+
+	timeline.push(debrief_block);
+
+
+var experiment = [while_loop_chunk];
+
+jsPsych.init({
+  timeline: timeline,
+  experiment_structure: timeline
+});
+
+	// jsPsych.init({
+ //      timeline: timeline,
+ //      on_finish: function() {
+ //      window.close();
+ //  }
+ //    });
+
+
+    </script>
+</html>
