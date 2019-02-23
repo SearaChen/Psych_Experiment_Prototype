@@ -1,0 +1,4 @@
+ - list of fake words already 
+
+ 1. put fake words into sounds
+ 2. saving the collected data to local 
